@@ -17,6 +17,15 @@ namespace DemoProject
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new LogIn());
+
+            if (!IsAnyWindowVisible())
+            {
+                return;
+            }
+        }
+        static bool IsAnyWindowVisible()
+        {
+            return Process.GetProcesses().Any(p => !string.IsNullOrEmpty(p.MainWindowTitle));
         }
     }
 }
