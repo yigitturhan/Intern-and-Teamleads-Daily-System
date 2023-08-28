@@ -18,10 +18,8 @@ namespace DemoProject
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new LogIn());
-
             if (!IsAnyWindowVisible())
             {
-                Console.WriteLine("No visible windows. Exiting.");
                 return;
             }
         }
