@@ -98,7 +98,12 @@ namespace DemoProject
         }
         private void tbxSearch_TextChanged(object sender, EventArgs e)
         {
-             dqwNotes.DataSource = _notedal.GetByTitle(tbxSearch.Text, user);
+            if (comboboxIntern.SelectedItem == null) dqwNotes.DataSource = _notedal.GetByTitle(tbxSearch.Text, user);
+            else
+            {
+                string selected = comboboxIntern.SelectedItem.ToString();
+                dqwNotes.DataSource = _notedal.GetByTitle(tbxSearch.Text, user, selected, user);
+            }
         }
         private void FillCombobox()
         {
@@ -140,10 +145,7 @@ namespace DemoProject
         private void comboboxIntern_SelectedIndexChanged(object sender, EventArgs e)
         {
             string selectedItem = comboboxIntern.SelectedItem.ToString();
-            if (selectedItem != null)
-            {
-                dqwNotes.DataSource = _notedal.GetByIntern(selectedItem,user);
-            }
+            if (selectedItem != null) dqwNotes.DataSource = _notedal.GetByIntern(selectedItem, user, tbxSearch.Text, user);
         }
         private void btnLogout_Click(object sender, EventArgs e)
         {

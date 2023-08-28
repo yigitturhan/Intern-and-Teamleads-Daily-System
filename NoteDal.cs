@@ -44,7 +44,7 @@ namespace DemoProject
                         InternId = intern.Id,
                         NoteId = id2,
                         InternName = intern.UserName
-                    }) ;
+                    });
                 }
                 context.SaveChanges();
             }
@@ -71,22 +71,39 @@ namespace DemoProject
                 context.SaveChanges();
             }
         }
-        public List<NoteWithReturn> GetByTitle(string key, IUser user)
+        public List<NoteWithReturn> GetByTitle(string key, IUser user, string selectedItem = "", TeamLead User = null)
         {
             using (InternNotesContext context = new InternNotesContext())
             {
+                List<NoteWithReturn> notes = new List<NoteWithReturn>();
                 var result = GenerateQuery();
                 if (user is TeamLead teamlead)
                 {
-                    return result.Where(p => p.Title.ToLower().Contains(key.ToLower()) && p.AuthorId == teamlead.Id).ToList();
+                    notes =  result.Where(p => p.Title.ToLower().Contains(key.ToLower()) && p.AuthorId == teamlead.Id).ToList();
                 }
                 else if (user is Intern intern)
                 {
-                    return result.Where(p => p.Title.ToLower().Contains(key.ToLower()) && p.AuthorId == intern.TeamleadId && p.InternId == intern.Id).ToList();
+                    notes = result.Where(p => p.Title.ToLower().Contains(key.ToLower()) && p.AuthorId == intern.TeamleadId && p.InternId == intern.Id).ToList();
                 }
-                List<NoteWithReturn> notes = new List<NoteWithReturn>();
+                if (selectedItem != "")
+                {
+                    List<NoteWithReturn> notes2 = GetByIntern(selectedItem, User);
+                    return GetIntersection(notes, notes2);
+                }
                 return notes;
             }
+        }
+        public List<NoteWithReturn> GetIntersection(List<NoteWithReturn> l1 , List<NoteWithReturn> l2)
+        {
+            List<NoteWithReturn> result = new List<NoteWithReturn>();
+            foreach (NoteWithReturn n1 in l1)
+            {
+                foreach(NoteWithReturn n2 in l2)
+                {
+                    if(n1.NoteId == n2.NoteId && n1.InternId == n2.InternId && n1.RetId == n2.RetId) result.Add(n1);
+                }
+            }
+            return result;
         }
         public List<NoteWithReturn> GenerateQuery()
         {
@@ -111,9 +128,15 @@ namespace DemoProject
                 return query.ToList();
             }
         }
-        public List<NoteWithReturn> GetByIntern(string selectedItem, TeamLead user)
+        public List<NoteWithReturn> GetByIntern(string selectedItem, TeamLead user, string key = "", IUser user2 = null)
         {
             List<NoteWithReturn> l = GetAll(user);
+            if (key != "")
+            {
+                List<NoteWithReturn> notes = GetByTitle(key, user2);
+                if (selectedItem == "====NO FILTER====") return notes;
+                return GetIntersection(l.Where(p => p.InternName == selectedItem).ToList(), notes);
+            }
             if (selectedItem == "====NO FILTER====") return l;
             return l.Where(p => p.InternName == selectedItem).ToList();
         }
@@ -123,19 +146,6 @@ namespace DemoProject
             List<NoteWithReturn> l = GetAll(user);
             if (v == "====NO FILTER====") return l;
             return l.Where(p => p.Status == v).ToList();
-        }
-        public void RemoveRets(List<int> noteIds)
-        {
-            using (InternNotesContext context = new InternNotesContext())
-            {
-                foreach (int id in noteIds)
-                {
-                    Return ret = context.Returns.FirstOrDefault(p => p.NoteId == id);
-                    var entity = context.Entry(ret);
-                    entity.State = EntityState.Deleted;
-                }
-                context.SaveChanges();
-            }
         }
         public void RemoveRets(int internId)
         {

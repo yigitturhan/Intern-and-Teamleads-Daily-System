@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,6 +18,16 @@ namespace DemoProject
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new LogIn());
+
+            if (!IsAnyWindowVisible())
+            {
+                Console.WriteLine("No visible windows. Exiting.");
+                return;
+            }
+        }
+        static bool IsAnyWindowVisible()
+        {
+            return Process.GetProcesses().Any(p => !string.IsNullOrEmpty(p.MainWindowTitle));
         }
     }
 }
